@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Home</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <!--
+      Need a visual blank slate?
+      Remove all code in `styles.css`!
+    -->
+    <link rel="stylesheet" href="styles.css" />
+    <script type="module" src="script.js"></script>
+
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.15.2/css/selectize.default.min.css"
+      integrity="sha512-pTaEn+6gF1IeWv3W1+7X7eM60TFu/agjgoHmYhAfLEU8Phuf6JKiiE8YmsNC0aCgQv4192s4Vai8YZ6VNM6vyQ=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.15.2/js/selectize.min.js"
+      integrity="sha512-IOebNkvA/HZjMM7MxL0NYeLYEalloZ8ckak+NDtOViP7oiYzG5vn6WVXyrJDiJPhl4yRdmNAG49iuLmhkUdVsQ=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+  </head>
+  <body>
+    <nav>
+      <a href="/" aria-current="page">Home</a>
+      <a href="/page2.html">Other page</a>
+    </nav>
+    <main>
+      <h1>Home page</h1>
+      <select></select>
+    </main>
+  </body>
+  <script>
+    var options = [];
+
+    function updateOptions() {
+      const data = [
+        { value: 'selectize@risadams.com', label: 'Ris Adams' },
+        { value: 'someone@gmail.com', label: 'Someone' },
+        { value: 'someone-else@yahoo.com', label: 'Someone Else' },
+      ];
+
+      data.forEach((option) => options.push(option));
+    }
+
+    updateOptions();
+
+    $(function () {
+      $('select').selectize({
+        plugins: ['restore_on_backspace', 'clear_button'],
+        delimiter: ' - ',
+        create: true,
+        persist: false,
+        maxItems: null,
+        valueField: 'value',
+        labelField: 'label',
+        searchField: ['label', 'value'],
+        options: options,
+        onOptionAdd(value, data) {
+          console.log(value);
+        },
+      });
+    });
+  </script>
+</html>

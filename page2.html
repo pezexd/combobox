@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Other page</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="stylesheet" href="styles.css" />
+    <script type="module" src="script.js"></script>
+  </head>
+  <body>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/page2.html" aria-current="page">Other page</a>
+    </nav>
+    <main>
+      <label id="combo3-label" class="combo-label">Multi-select Combobox</label>
+      <span id="combo3-remove" style="display: none">remove</span>
+      <ul class="selected-options" id="combo3-selected"></ul>
+      <div class="combo js-multiselect">
+        <input
+          aria-activedescendant=""
+          aria-autocomplete="none"
+          aria-controls="listbox3"
+          aria-expanded="false"
+          aria-haspopup="listbox"
+          aria-labelledby="combo3-label combo3-selected"
+          id="combo3"
+          class="combo-input"
+          role="combobox"
+          type="text"
+        />
+        <div class="combo-menu" role="listbox" id="listbox3"></div>
+      </div>
+    </main>
+  </body>
+  <script src="function.js"></script>
+</html>
