@@ -13,7 +13,10 @@
       <a href="/page2.html" aria-current="page">Other page</a>
     </nav>
     <main>
-      <label id="combo3-label" class="combo-label">Multi-select Combobox</label>
+      <label id="combo3-label" class="combo-label"
+        >Segmentacion detallada</label
+      >
+      <!-- <span id="arr"></span> -->
       <span id="combo3-remove" style="display: none">remove</span>
       <ul class="selected-options" id="combo3-selected"></ul>
       <div class="combo js-multiselect">
@@ -28,10 +31,27 @@
           class="combo-input"
           role="combobox"
           type="text"
+          pattern="^[a-zA-Z]+(?: [a-zA-Z]+)*$"
         />
-        <div class="combo-menu" role="listbox" id="listbox3"></div>
+        <div class="combo-menu" role="listbox" id="listbox3">
+          <div id="combo-add" class="hide">
+            <div class="combo-new">
+              <span
+                id="combo-add-text"
+                class="combo-new-text"
+                class="hide"
+              ></span>
+              (Agregar este producto)
+            </div>
+          </div>
+        </div>
       </div>
+      <p id="error" class="error-text">
+        Solo se admiten letras, no se admite doble espacio, no se admiten
+        caracteres especiales.
+      </p>
     </main>
   </body>
+  <script></script>
   <script src="function.js"></script>
 </html>

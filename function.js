@@ -32,7 +32,8 @@ const MenuActions = {
 // returns an array of options that begin with the filter string, case-independent
 function filterOptions(options = [], filter, exclude = []) {
   return options.filter((option) => {
-    const matches = option.toLowerCase().indexOf(filter.toLowerCase()) === 0;
+    const matches =
+      option.text.toLowerCase().indexOf(filter.toLowerCase()) === 0;
     return matches && exclude.indexOf(option) < 0;
   });
 }
@@ -40,6 +41,7 @@ function filterOptions(options = [], filter, exclude = []) {
 // return an array of exact option name matches from a comma-separated string
 function findMatches(options, search) {
   const names = search.split(',');
+
   return names
     .map((name) => {
       const match = options.filter(
@@ -129,16 +131,18 @@ function maintainScrollVisibility(activeElement, scrollParent) {
 
 // init combo
 const comboEl = document.querySelector('.js-combobox');
+// document
+//   .getElementById('combo-add')
+//   .addEventListener('click', () => console.log('ola'));
+
 const options = [
-  'HTML',
-  'CSS',
-  'JavaScript',
-  'PHP',
-  'MySQL',
-  'React',
-  'Angular',
-  'Python',
+  { text: 'HTML', value: 0 },
+  { text: 'CSS', value: 1 },
+  { text: 'JS', value: 2 },
+  { text: 'PHP', value: 3 },
 ];
+
+const selecteds = [];
 
 /*
  * Multiselect code
@@ -174,7 +178,7 @@ Multiselect.prototype.init = function () {
     optionEl.className =
       index === 0 ? 'combo-option option-current' : 'combo-option';
     optionEl.setAttribute('aria-selected', 'false');
-    optionEl.innerText = option;
+    optionEl.innerText = option.text;
 
     optionEl.addEventListener('click', () => {
       this.onOptionClick(index);
@@ -188,6 +192,20 @@ Multiselect.prototype.init = function () {
 Multiselect.prototype.onInput = function () {
   const curValue = this.inputEl.value;
   const matches = filterOptions(this.options, curValue);
+
+  if (this.inputEl.checkValidity()) {
+    document.getElementById('error').classList.add('hide');
+  } else {
+    document.getElementById('error').classList.remove('hide');
+  }
+
+  if (!matches.length) {
+    document.getElementById('combo-add').classList.remove('hide');
+  } else {
+    document.getElementById('combo-add').classList.add('hide');
+  }
+
+  document.getElementById('combo-add-text').innerText = curValue;
 
   // set activeIndex to first matching option
   // (or leave it alone, if the active option is already in the matching set)
@@ -268,6 +286,7 @@ Multiselect.prototype.onOptionMouseDown = function () {
 
 Multiselect.prototype.removeOption = function (index) {
   const option = this.options[index];
+  removeOfSelecteds(this.options, index);
 
   // update aria-selected
   const options = this.el.querySelectorAll('[role=option]');
@@ -279,8 +298,24 @@ Multiselect.prototype.removeOption = function (index) {
   this.selectedEl.removeChild(buttonEl.parentElement);
 };
 
+const addToSelecteds = (options, index) => {
+  selecteds.push(options[index].value);
+  // document.getElementById('arr').innerHTML = selecteds;
+};
+
+const removeOfSelecteds = (options, index) => {
+  const record = selecteds.findIndex(
+    (selected) => selected == options[index].value
+  );
+
+  selecteds.splice(record, 1);
+
+  // document.getElementById('arr').innerHTML = selecteds;
+};
+
 Multiselect.prototype.selectOption = function (index) {
   const selected = this.options[index];
+  addToSelecteds(this.options, index);
   this.activeIndex = index;
 
   // update aria-selected
@@ -298,7 +333,7 @@ Multiselect.prototype.selectOption = function (index) {
   buttonEl.addEventListener('click', () => {
     this.removeOption(index);
   });
-  buttonEl.innerHTML = selected + ' ';
+  buttonEl.innerHTML = selected.text + ' ';
 
   listItem.appendChild(buttonEl);
   this.selectedEl.appendChild(listItem);
