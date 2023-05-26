@@ -175,21 +175,20 @@ Multiselect.prototype.init = function () {
 
     options.push({ text: this.inputEl.value, value: this.inputEl.value });
 
+    mapOptions.bind(this)();
     this.inputEl.value = '';
     this.inputEl.focus();
+    document.getElementById('combo-add').classList.add('hide');
   });
 
   this.addEl.addEventListener('mousedown', this.onOptionMouseDown.bind(this));
 
   function mapOptions() {
-    // while (this.listboxEl.firstChild) {
-    //   this.listboxEl.removeChild(this.listboxEl.lastChild);
-    // }
-    // myNode.querySelectorAll('*').forEach( n => n.remove() );
-    this.listboxEl.querySelectorAll('*').forEach((n, i) => {
-      if (i == 0) return;
-      n.remove();
-    });
+    this.listboxEl
+      .querySelectorAll('div:not(#combo-add):not(.combo-new)')
+      .forEach((n, i) => {
+        n.remove();
+      });
 
     this.options.map((option, index) => {
       const optionEl = document.createElement('div');
