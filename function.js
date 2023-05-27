@@ -28,6 +28,16 @@ const MenuActions = {
   Type: 9,
 };
 
+// function formatText(text) {
+//   // text = text.trim();
+//   // pattern="^[a-zA-Z]+(?: [a-zA-Z]+)*$"
+//   text = text.replace(/[^a-zA-Z\s]/g, '');
+//   text = text.replace(/\s+/g, ' ');
+//   text = text.toLowerCase();
+//   text = text.charAt(0).toUpperCase() + text.slice(1);
+//   return text;
+// }
+
 // filter an array of options against an input string
 // returns an array of options that begin with the filter string, case-independent
 function filterOptions(options = [], filter, exclude = []) {
@@ -129,9 +139,6 @@ function maintainScrollVisibility(activeElement, scrollParent) {
   }
 }
 
-// init combo
-const comboEl = document.querySelector('.js-combobox');
-
 const options = [
   { text: 'HTML', value: 0 },
   { text: 'CSS', value: 1 },
@@ -175,7 +182,7 @@ Multiselect.prototype.init = function () {
 
     options.push({ text: this.inputEl.value, value: this.inputEl.value });
 
-    mapOptions.bind(this)();
+    this.mapOptions.bind(this)(options);
     this.inputEl.value = '';
     this.inputEl.focus();
     document.getElementById('combo-add').classList.add('hide');
@@ -183,37 +190,65 @@ Multiselect.prototype.init = function () {
 
   this.addEl.addEventListener('mousedown', this.onOptionMouseDown.bind(this));
 
-  function mapOptions() {
-    this.listboxEl
-      .querySelectorAll('div:not(#combo-add):not(.combo-new)')
-      .forEach((n, i) => {
-        n.remove();
-      });
+  this.mapOptions.bind(this)(options);
+};
 
-    this.options.map((option, index) => {
-      const optionEl = document.createElement('div');
-      optionEl.setAttribute('role', 'option');
-      optionEl.id = `${this.idBase}-${index}`;
-      optionEl.className =
-        index === 0 ? 'combo-option option-current' : 'combo-option';
-      optionEl.setAttribute('aria-selected', 'false');
-      optionEl.innerText = option.text;
+Multiselect.prototype.mapOptions = function (options) {
+  this.listboxEl.querySelectorAll('[role=option]').forEach((n, i) => {
+    n.remove();
+  });
 
-      optionEl.addEventListener('click', () => {
-        this.onOptionClick(index);
-      });
-      optionEl.addEventListener('mousedown', this.onOptionMouseDown.bind(this));
+  options.map((option, index) => {
+    const optionEl = document.createElement('div');
+    const conditional = selecteds.some(
+      (selection) => selection === option.value
+    );
+    optionEl.setAttribute('role', 'option');
+    optionEl.id = `${this.idBase}-${index}`;
 
-      this.listboxEl.appendChild(optionEl);
+    optionEl.className = conditional
+      ? 'combo-option option-selected'
+      : 'combo-option';
+    optionEl.setAttribute('aria-selected', conditional ? 'true' : 'false');
+    optionEl.innerText = option.text;
+
+    optionEl.addEventListener('click', () => {
+      this.onOptionClick(index);
     });
-  }
+    optionEl.addEventListener('mousedown', this.onOptionMouseDown.bind(this));
 
-  mapOptions.bind(this)();
+    this.listboxEl.appendChild(optionEl);
+  });
 };
 
 Multiselect.prototype.onInput = function () {
   const curValue = this.inputEl.value;
-  const matches = filterOptions(this.options, curValue);
+  const query = this.inputEl.value;
+
+  // const formated = formatText(curValue);
+  // this.inputEl.value = formated;
+
+  // const matches = filterOptions(this.options, curValue);
+
+  function includes(str, query) {
+    if (str === undefined) str = 'undefined';
+    if (str === null) str = 'null';
+    if (str === false) str = 'false';
+    const text = str.toString().toLowerCase();
+    return text.indexOf(query.trim()) !== -1;
+  }
+
+  const matches = query
+    ? this.options
+        .filter(({ text }) => includes(text, query.toLowerCase()))
+        .sort((a, b) => a.text.length - b.text.length)
+    : this.options;
+
+  if (query) {
+    this.mapOptions.bind(this)(matches);
+  } else {
+    this.mapOptions.bind(this)(this.options);
+  }
 
   if (this.inputEl.checkValidity()) {
     document.getElementById('error').classList.add('hide');
@@ -231,12 +266,12 @@ Multiselect.prototype.onInput = function () {
 
   // set activeIndex to first matching option
   // (or leave it alone, if the active option is already in the matching set)
-  const filterCurrentOption = matches.filter(
-    (option) => option === this.options[this.activeIndex]
-  );
-  if (matches.length > 0 && !filterCurrentOption.length) {
-    this.onOptionChange(this.options.indexOf(matches[0]));
-  }
+  // const filterCurrentOption = matches.filter(
+  //   (option) => option === this.options[this.activeIndex]
+  // );
+  // if (matches.length > 0 && !filterCurrentOption.length) {
+  //   this.onOptionChange(this.options.indexOf(matches[0]));
+  // }
 
   const menuState = this.options.length > 0;
   if (this.open !== menuState) {
@@ -362,7 +397,6 @@ Multiselect.prototype.selectOption = function (index) {
 };
 
 Multiselect.prototype.updateOption = function (index) {
-  const option = this.options[index];
   const optionEl = this.el.querySelectorAll('[role=option]')[index];
   const isSelected = optionEl.getAttribute('aria-selected') === 'true';
 
