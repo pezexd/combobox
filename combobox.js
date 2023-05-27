@@ -306,19 +306,21 @@ Multiselect.prototype.onInput = function () {
     this.mapOptions.bind(this)(this.options);
   }
 
-  if (this.inputEl.checkValidity()) {
-    document.getElementById('error').classList.add('hide');
-  } else {
-    document.getElementById('error').classList.remove('hide');
-  }
+  // if (this.inputEl.checkValidity()) {
+  //   document.getElementById('error').classList.add('hide');
+  // } else {
+  //   document.getElementById('error').classList.remove('hide');
+  // }
 
   if (!matches.length) {
-    document.getElementById('combo-add').classList.remove('hide');
+    this.addEl.classList.remove('hide');
   } else {
-    document.getElementById('combo-add').classList.add('hide');
+    this.addEl.classList.add('hide');
   }
 
-  document.getElementById('combo-add-text').innerText = formatText(query);
+  this.addEl.innerHTML = `<div id="combo-add-text" class="combo-new">${formatText(
+    query
+  )} (Agregar este producto)</div>`;
 
   // set activeIndex to first matching option
   // (or leave it alone, if the active option is already in the matching set)

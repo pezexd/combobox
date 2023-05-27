@@ -2,8 +2,8 @@
   display: none;
 }
 
-.error-text {
-  color: #b91c1c;
+.tooltip-text {
+  color: #00b1ec;
   font-size: 12px;
 }
 
@@ -102,10 +102,6 @@
   user-select: none;
   display: flex;
   column-gap: 2px;
-}
-
-.combo-new-text {
-  display: flex;
 }
 
 .combo-option.option-current,

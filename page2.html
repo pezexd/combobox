@@ -17,7 +17,6 @@
       <label id="combo3-label" class="combo-label"
         >Segmentacion detallada</label
       >
-      <!-- <span id="arr"></span> -->
       <span id="combo3-remove" style="display: none">remove</span>
       <div class="combo js-multiselect">
         <input
@@ -31,19 +30,10 @@
           class="combo-input"
           role="combobox"
           type="text"
-          pattern="^[A-Z]+[a-zA-Z]+(?: [a-zA-Z]+)*$"
         />
+        <!-- pattern="^[A-Z]+[a-zA-Z]+(?: [a-zA-Z]+)*$" -->
         <div class="combo-menu">
-          <div id="combo-add" class="hide">
-            <div class="combo-new">
-              <span
-                id="combo-add-text"
-                class="combo-new-text"
-                class="hide"
-              ></span>
-              (Agregar este producto)
-            </div>
-          </div>
+          <div role="button" id="combo-add" class="hide"></div>
           <div role="listbox" id="listbox3"></div>
         </div>
         <div class="selected-wrapper">
@@ -51,10 +41,10 @@
           <ul class="selected-options" id="combo3-selected"></ul>
         </div>
       </div>
-      <ul id="error" class="error-text hide">
+      <ul id="tooltip" class="tooltip-text">
         <li>Solo se admiten letras</li>
         <li>La primera letra debe ser mayuscula</li>
-        <li>No se admite mas 1 espacio consecutivo</li>
+        <li>No se admite mas de 1 espacio consecutivo</li>
         <li>No se admiten caracteres especiales (tildes, simbolos, etc)</li>
       </ul>
     </main>
