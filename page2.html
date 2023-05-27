@@ -30,7 +30,7 @@
           class="combo-input"
           role="combobox"
           type="text"
-          pattern="^[a-zA-Z]+(?: [a-zA-Z]+)*$"
+          pattern="^[A-Z]+[a-zA-Z]+(?: [a-zA-Z]+)*$"
         />
         <div class="combo-menu">
           <div id="combo-add" class="hide">
@@ -50,8 +50,9 @@
           <ul class="selected-options" id="combo3-selected"></ul>
         </div>
       </div>
-      <ul id="error" class="error-text">
+      <ul id="error" class="error-text hide">
         <li>Solo se admiten letras</li>
+        <li>La primera letra debe ser mayuscula</li>
         <li>No se admite mas 1 espacio consecutivo</li>
         <li>No se admiten caracteres especiales (tildes, simbolos, etc)</li>
       </ul>

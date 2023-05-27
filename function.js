@@ -29,8 +29,6 @@ const MenuActions = {
 };
 
 function formatText(text) {
-  // text = text.trim();
-  // pattern="^[a-zA-Z]+(?: [a-zA-Z]+)*$"
   text = text.replace(/[^a-zA-Z\s]/g, '');
   text = text.replace(/\s+/g, ' ');
   text = text.toLowerCase();
@@ -140,11 +138,37 @@ function maintainScrollVisibility(activeElement, scrollParent) {
 }
 
 const options = [
-  { tag: 'HTML' },
-  { tag: 'CSS' },
-  { tag: 'JS' },
-  { tag: 'PHP' },
+  { tag: 'Html' },
+  { tag: 'Css' },
+  { tag: 'Js' },
+  { tag: 'Php' },
 ];
+
+function optionsMethods() {
+  const data = options;
+
+  function refresh() {
+    fetch('/tags').then((res) => {
+      options = res.json();
+    });
+  }
+
+  function add(text) {
+    return fetch('/tags', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ tag: text }),
+    });
+  }
+
+  return {
+    add,
+    data,
+    refresh,
+  };
+}
 
 const selections = [];
 
@@ -198,9 +222,16 @@ Multiselect.prototype.init = function () {
 
   this.addEl.addEventListener('click', (e) => {
     const toAdd = formatText(this.inputEl.value);
-    console.log('ADD TO DATABASE');
+    const { refresh, add } = optionsMethods();
 
+    // Method where add tag to database
+    add(toAdd);
+
+    // Dummy
     options.push({ tag: toAdd });
+
+    // Method where refresh options from database
+    refresh();
 
     this.reset();
 
@@ -384,17 +415,25 @@ Multiselect.prototype.selectOption = function (option) {
   this.mapOptions(options);
 
   // // add remove option button
-  const buttonEl = document.createElement('button');
   const listItem = document.createElement('li');
-  buttonEl.className = 'remove-option';
+  listItem.className = 'remove-option';
+
+  const textEl = document.createElement('span');
+  textEl.innerHTML = option;
+
+  const buttonEl = document.createElement('button');
+  buttonEl.className = 'clear-button remove-option-x';
   buttonEl.type = 'button';
   buttonEl.id = `${this.idBase}-remove-${option}`;
   buttonEl.setAttribute('aria-describedby', `${this.idBase}-remove`);
   buttonEl.addEventListener('click', () => {
     this.removeOption(option);
   });
-  buttonEl.innerHTML = option + ' ';
+  buttonEl.innerHTML = `<svg viewBox="0 0 14 14" class="x-icon">
+  //       <path d="M4 4l6 6m0-6l-6 6" />
+  //     </svg>`;
 
+  listItem.appendChild(textEl);
   listItem.appendChild(buttonEl);
   this.selectedEl.appendChild(listItem);
 };
