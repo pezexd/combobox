@@ -28,15 +28,15 @@ const MenuActions = {
   Type: 9,
 };
 
-// function formatText(text) {
-//   // text = text.trim();
-//   // pattern="^[a-zA-Z]+(?: [a-zA-Z]+)*$"
-//   text = text.replace(/[^a-zA-Z\s]/g, '');
-//   text = text.replace(/\s+/g, ' ');
-//   text = text.toLowerCase();
-//   text = text.charAt(0).toUpperCase() + text.slice(1);
-//   return text;
-// }
+function formatText(text) {
+  // text = text.trim();
+  // pattern="^[a-zA-Z]+(?: [a-zA-Z]+)*$"
+  text = text.replace(/[^a-zA-Z\s]/g, '');
+  text = text.replace(/\s+/g, ' ');
+  text = text.toLowerCase();
+  text = text.charAt(0).toUpperCase() + text.slice(1);
+  return text;
+}
 
 // filter an array of options against an input string
 // returns an array of options that begin with the filter string, case-independent
@@ -140,13 +140,32 @@ function maintainScrollVisibility(activeElement, scrollParent) {
 }
 
 const options = [
-  { text: 'HTML', value: 0 },
-  { text: 'CSS', value: 1 },
-  { text: 'JS', value: 2 },
-  { text: 'PHP', value: 3 },
+  { tag: 'HTML' },
+  { tag: 'CSS' },
+  { tag: 'JS' },
+  { tag: 'PHP' },
 ];
 
-const selecteds = [];
+const selections = [];
+
+function selectionsMethods() {
+  const data = selections;
+
+  const add = (option) => {
+    selections.push(option);
+  };
+
+  const remove = (option) => {
+    const record = selections.findIndex((selection) => selection === option);
+    selections.splice(record, 1);
+  };
+
+  return {
+    add,
+    remove,
+    data,
+  };
+}
 
 /*
  * Multiselect code
@@ -178,13 +197,14 @@ Multiselect.prototype.init = function () {
   this.listboxEl.addEventListener('blur', this.onInputBlur.bind(this));
 
   this.addEl.addEventListener('click', (e) => {
+    const toAdd = formatText(this.inputEl.value);
     console.log('ADD TO DATABASE');
 
-    options.push({ text: this.inputEl.value, value: this.inputEl.value });
+    options.push({ tag: toAdd });
 
-    this.mapOptions.bind(this)(options);
-    this.inputEl.value = '';
-    this.inputEl.focus();
+    this.reset();
+
+    this.onOptionClick(toAdd);
     document.getElementById('combo-add').classList.add('hide');
   });
 
@@ -193,27 +213,33 @@ Multiselect.prototype.init = function () {
   this.mapOptions.bind(this)(options);
 };
 
+Multiselect.prototype.reset = function () {
+  this.inputEl.value = '';
+  this.mapOptions(this.options);
+  this.inputEl.focus();
+};
+
 Multiselect.prototype.mapOptions = function (options) {
   this.listboxEl.querySelectorAll('[role=option]').forEach((n, i) => {
     n.remove();
   });
 
-  options.map((option, index) => {
+  options.map((option) => {
     const optionEl = document.createElement('div');
-    const conditional = selecteds.some(
-      (selection) => selection === option.value
+    const conditional = selections.some(
+      (selection) => selection === option.tag
     );
     optionEl.setAttribute('role', 'option');
-    optionEl.id = `${this.idBase}-${index}`;
+    optionEl.id = `${this.idBase}-${option.tag}`;
 
     optionEl.className = conditional
       ? 'combo-option option-selected'
       : 'combo-option';
     optionEl.setAttribute('aria-selected', conditional ? 'true' : 'false');
-    optionEl.innerText = option.text;
+    optionEl.innerText = option.tag;
 
     optionEl.addEventListener('click', () => {
-      this.onOptionClick(index);
+      this.onOptionClick(option.tag);
     });
     optionEl.addEventListener('mousedown', this.onOptionMouseDown.bind(this));
 
@@ -222,7 +248,6 @@ Multiselect.prototype.mapOptions = function (options) {
 };
 
 Multiselect.prototype.onInput = function () {
-  const curValue = this.inputEl.value;
   const query = this.inputEl.value;
 
   // const formated = formatText(curValue);
@@ -240,8 +265,8 @@ Multiselect.prototype.onInput = function () {
 
   const matches = query
     ? this.options
-        .filter(({ text }) => includes(text, query.toLowerCase()))
-        .sort((a, b) => a.text.length - b.text.length)
+        .filter(({ tag }) => includes(tag, query.toLowerCase()))
+        .sort((a, b) => a.tag.length - b.tag.length)
     : this.options;
 
   if (query) {
@@ -262,7 +287,7 @@ Multiselect.prototype.onInput = function () {
     document.getElementById('combo-add').classList.add('hide');
   }
 
-  document.getElementById('combo-add-text').innerText = curValue;
+  document.getElementById('combo-add-text').innerText = formatText(query);
 
   // set activeIndex to first matching option
   // (or leave it alone, if the active option is already in the matching set)
@@ -315,25 +340,36 @@ Multiselect.prototype.onInputBlur = function () {
   }
 };
 
-Multiselect.prototype.onOptionChange = function (index) {
-  this.activeIndex = index;
-  this.inputEl.setAttribute('aria-activedescendant', `${this.idBase}-${index}`);
-
-  // update active style
+Multiselect.prototype.onOptionChange = function (option) {
   const options = this.el.querySelectorAll('[role=option]');
   [...options].forEach((optionEl) => {
     optionEl.classList.remove('option-current');
   });
-  options[index].classList.add('option-current');
 
-  if (this.open && isScrollable(this.listboxEl)) {
-    maintainScrollVisibility(options[index], this.listboxEl);
+  if (typeof option === 'number') {
+    if (options.length) {
+      this.activeIndex = option;
+      options[option].classList.add('option-current');
+    }
+
+    return;
   }
+  this.inputEl.setAttribute(
+    'aria-activedescendant',
+    `${this.idBase}-${option}`
+  );
+
+  const optionEl = this.el.querySelector(`#${this.idBase}-${option}`);
+  optionEl.classList.add('option-current');
+
+  // if (this.open && isScrollable(this.listboxEl)) {
+  //   maintainScrollVisibility(options[index], this.listboxEl);
+  // }
 };
 
-Multiselect.prototype.onOptionClick = function (index) {
-  this.onOptionChange(index);
-  this.updateOption(index);
+Multiselect.prototype.onOptionClick = function (option) {
+  this.onOptionChange(option);
+  this.updateOption(option);
   this.inputEl.focus();
 };
 
@@ -341,72 +377,63 @@ Multiselect.prototype.onOptionMouseDown = function () {
   this.ignoreBlur = true;
 };
 
-Multiselect.prototype.removeOption = function (index) {
-  const option = this.options[index];
-  removeOfSelecteds(this.options, index);
+Multiselect.prototype.selectOption = function (option) {
+  const selections = selectionsMethods();
+  selections.add(option);
 
-  // update aria-selected
-  const options = this.el.querySelectorAll('[role=option]');
-  options[index].setAttribute('aria-selected', 'false');
-  options[index].classList.remove('option-selected');
+  this.mapOptions(options);
 
-  // remove button
-  const buttonEl = document.getElementById(`${this.idBase}-remove-${index}`);
-  this.selectedEl.removeChild(buttonEl.parentElement);
-};
-
-const addToSelecteds = (options, index) => {
-  selecteds.push(options[index].value);
-  // document.getElementById('arr').innerHTML = selecteds;
-};
-
-const removeOfSelecteds = (options, index) => {
-  const record = selecteds.findIndex(
-    (selected) => selected == options[index].value
-  );
-
-  selecteds.splice(record, 1);
-
-  // document.getElementById('arr').innerHTML = selecteds;
-};
-
-Multiselect.prototype.selectOption = function (index) {
-  const selected = this.options[index];
-  addToSelecteds(this.options, index);
-  this.activeIndex = index;
-
-  // update aria-selected
-  const options = this.el.querySelectorAll('[role=option]');
-  options[index].setAttribute('aria-selected', 'true');
-  options[index].classList.add('option-selected');
-
-  // add remove option button
+  // // add remove option button
   const buttonEl = document.createElement('button');
   const listItem = document.createElement('li');
   buttonEl.className = 'remove-option';
   buttonEl.type = 'button';
-  buttonEl.id = `${this.idBase}-remove-${index}`;
+  buttonEl.id = `${this.idBase}-remove-${option}`;
   buttonEl.setAttribute('aria-describedby', `${this.idBase}-remove`);
   buttonEl.addEventListener('click', () => {
-    this.removeOption(index);
+    this.removeOption(option);
   });
-  buttonEl.innerHTML = selected.text + ' ';
+  buttonEl.innerHTML = option + ' ';
 
   listItem.appendChild(buttonEl);
   this.selectedEl.appendChild(listItem);
 };
 
-Multiselect.prototype.updateOption = function (index) {
-  const optionEl = this.el.querySelectorAll('[role=option]')[index];
+Multiselect.prototype.removeOption = function (option) {
+  const selections = selectionsMethods();
+  selections.remove(option);
+
+  this.mapOptions(options);
+
+  // // remove button
+  const buttonEl = document.getElementById(`${this.idBase}-remove-${option}`);
+  this.selectedEl.removeChild(buttonEl.parentElement);
+};
+
+Multiselect.prototype.updateOption = function (option) {
+  let optionEl = this.el.querySelector(`#${this.idBase}-${option}`);
+
+  if (typeof option === 'number') {
+    const options = this.el.querySelectorAll('[role=option]');
+
+    if (!options.length) {
+      this.addEl.click();
+      return;
+    }
+
+    optionEl = options[option];
+
+    option = optionEl.innerHTML;
+  }
   const isSelected = optionEl.getAttribute('aria-selected') === 'true';
 
-  if (isSelected) {
-    this.removeOption(index);
+  if (!isSelected) {
+    this.selectOption(option);
   } else {
-    this.selectOption(index);
+    this.removeOption(option);
   }
 
-  this.inputEl.value = '';
+  this.reset();
 };
 
 Multiselect.prototype.updateMenuState = function (open, callFocus = true) {
@@ -419,7 +446,6 @@ Multiselect.prototype.updateMenuState = function (open, callFocus = true) {
   } else {
     this.el.classList.remove('open');
   }
-  // open ? this.el.classList.add('open') : this.el.classList.remove('open');
   callFocus && this.inputEl.focus();
 };
 

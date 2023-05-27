@@ -224,6 +224,7 @@ h1 {
 }
 
 .remove-option {
+  cursor: pointer;
   display: inline-flex;
   padding-top: 0.25rem;
   padding-bottom: 0.25rem;
