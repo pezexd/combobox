@@ -1,8 +1,8 @@
-Inicializar un campo
+Inicializar un campo (cambiar REF por cualquier identificador)
 
 ```
 [index.html]
-<div class="combo multiselect">
+<div class="combo multiselectREF">
 	<input
 		aria-activedescendant=""
 		aria-autocomplete="none"
@@ -10,7 +10,7 @@ Inicializar un campo
 		aria-expanded="false"
 		aria-haspopup="listbox"
 		aria-labelledby="combo3-label combo3-selected"
-		id="combo3"
+		id="comboREF"
 		class="combo-input"
 		role="combobox"
 		type="text"
@@ -21,41 +21,43 @@ Inicializar un campo
 	</div>
 	<div class="selected-wrapper">
 		<span>Intereses</span>
-		<ul  class="selected-options" id="combo3-selected"></ul>
+		<ul  class="selected-options" id="comboREF-selected"></ul>
 	</div>
 </div>
 
 <script>
-const  multiselectEl = document.querySelector('.multiselect');
+let options = [];
+let selections = [];
 
-const  multiselectComponent = new  Multiselect(multiselectEl, options);
+const  multiselectEl = document.querySelector('.multiselectREF');
 
-multiselectComponent.init();
-</script>
-```
-
-Para agregar un tag a la bd (ref: 167)
-
-```
-function  add(text) {
-	return  fetch('/tags', {
-		method:  'POST',
-		headers: {
-			'Content-Type':  'application/json',
-		},
-		body:  JSON.stringify({ tag:  text }),
-	});
-}
-```
-
-Para listar las opciones (ref:156)
-
-```
-function  refresh() {
-	fetch('/tags')
+const  multiselectComponent = new  Multiselect(multiselectEl, options, {
+	async  refresh() {
+		fetch('/tags')
 		.then((res) =>  res.json())
 		.then((data) => {
 			options = data;
 		});
-}
+	},
+	onAdd(text) {
+		fetch('/tags', {
+			method:  'POST',
+			headers: {
+				'Content-Type':  'application/json',
+			},
+			body:  JSON.stringify({ tag:  text }),
+		});
+	},
+	onSelect(option) {
+		selections.push(option);
+	},
+	onRemove(option) {
+		const  record = selections.findIndex((selection) =>  selection === option);
+		selections.splice(record, 1);
+	},
+	selections,
+});
+
+multiselectComponent.init();
+</script>
 ```

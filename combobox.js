@@ -140,75 +140,10 @@ function maintainScrollVisibility(activeElement, scrollParent) {
   }
 }
 
-/**
- * Opciones para la listbox, los elementos deben tener el formato:
- * { tag: 'name' }
- */
-const options = [];
-
-function optionsMethods() {
-  const data = options;
-
-  /**
-   * Funcion para refrescar las opciones luego de agregar un tag a la db
-   * el formato debe llegar como un array: [{ tag: 'name', ... }]
-   */
-  function refresh() {
-    fetch('/tags')
-      .then((res) => res.json())
-      .then((data) => {
-        options = data;
-      });
-  }
-
-  /**
-   * Funcion para agregar a la db
-   */
-  function add(text) {
-    return fetch('/tags', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ tag: text }),
-    });
-  }
-
-  return {
-    add,
-    data,
-    refresh,
-  };
-}
-
-/**
- * Tags seleccionados separados por comas: ['name', 'name2']
- */
-const selections = [];
-
-function selectionsMethods() {
-  const data = selections;
-
-  const add = (option) => {
-    selections.push(option);
-  };
-
-  const remove = (option) => {
-    const record = selections.findIndex((selection) => selection === option);
-    selections.splice(record, 1);
-  };
-
-  return {
-    add,
-    remove,
-    data,
-  };
-}
-
 /*
  * Multiselect code
  */
-const Multiselect = function (el, options) {
+const Multiselect = function (el, options, settings) {
   // element refs
   this.el = el;
   this.inputEl = el.querySelector('input');
@@ -221,14 +156,14 @@ const Multiselect = function (el, options) {
   // data
   this.options = options;
 
+  this.settings = settings;
+
   // state
   this.activeIndex = 0;
   this.open = false;
 };
 
 Multiselect.prototype.init = function () {
-  const { refresh, add } = optionsMethods();
-
   this.inputEl.addEventListener('input', this.onInput.bind(this));
   this.inputEl.addEventListener('blur', this.onInputBlur.bind(this));
   this.inputEl.addEventListener('click', () => this.updateMenuState(true));
@@ -242,7 +177,7 @@ Multiselect.prototype.init = function () {
     /**
      * Agregar a db
      */
-    add(toAdd);
+    this.settings.onAdd(toAdd);
 
     /**
      * Comentar esto
@@ -252,7 +187,7 @@ Multiselect.prototype.init = function () {
     /**
      * Refrescar opciones
      */
-    refresh();
+    this.settings.refresh();
 
     /**
      * Renderizar nuevas opciones
@@ -268,9 +203,9 @@ Multiselect.prototype.init = function () {
   /**
    * Traer opciones de la db
    */
-  refresh();
+  this.settings.refresh();
 
-  this.mapOptions.bind(this)(options);
+  this.mapOptions.bind(this)(this.options);
 };
 
 Multiselect.prototype.reset = function () {
@@ -288,7 +223,7 @@ Multiselect.prototype.mapOptions = function (options) {
     const optionEl = document.createElement('div');
     const { parsed, unparsed } = tagFormat(option.tag);
 
-    const conditional = selections.some(
+    const conditional = this.settings.selections.some(
       (selection) => selection === option.tag
     );
     optionEl.setAttribute('role', 'option');
@@ -434,8 +369,7 @@ Multiselect.prototype.onOptionMouseDown = function () {
 
 Multiselect.prototype.selectOption = function (option) {
   const { parsed, unparsed } = tagFormat(option);
-  const selections = selectionsMethods();
-  selections.add(unparsed);
+  this.settings.onSelect(unparsed);
 
   this.mapOptions(options);
 
@@ -465,8 +399,7 @@ Multiselect.prototype.selectOption = function (option) {
 
 Multiselect.prototype.removeOption = function (option) {
   const { parsed } = tagFormat(option);
-  const selections = selectionsMethods();
-  selections.remove(option);
+  this.settings.onRemove(option);
 
   this.mapOptions(options);
 
@@ -520,7 +453,43 @@ Multiselect.prototype.updateMenuState = function (open, callFocus = true) {
   callFocus && this.inputEl.focus();
 };
 
+/**
+ * Opciones para la listbox, los elementos deben tener el formato:
+ * { tag: 'name' }
+ */
+let options = [];
+
+/**
+ * Tags seleccionados separados por comas: ['name', 'name2']
+ */
+let selections = [];
+
 // init multiselect
 const multiselectEl = document.querySelector('.js-multiselect');
-const multiselectComponent = new Multiselect(multiselectEl, options);
+const multiselectComponent = new Multiselect(multiselectEl, options, {
+  async refresh() {
+    fetch('/tags')
+      .then((res) => res.json())
+      .then((data) => {
+        options = data;
+      });
+  },
+  onAdd(text) {
+    fetch('/tags', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ tag: text }),
+    });
+  },
+  onSelect(option) {
+    selections.push(option);
+  },
+  onRemove(option) {
+    const record = selections.findIndex((selection) => selection === option);
+    selections.splice(record, 1);
+  },
+  selections,
+});
 multiselectComponent.init();
