@@ -150,7 +150,9 @@
 .selected-options {
   list-style-type: none;
   display: flex;
+  flex-wrap: wrap;
   max-width: 400px;
+  row-gap: 0.75rem;
   column-gap: 0.75rem;
   margin-top: 0;
   margin-left: 0;

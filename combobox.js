@@ -28,6 +28,23 @@ const MenuActions = {
   Type: 9,
 };
 
+/**
+ * Transformacion para espacios en blancos en tags
+ */
+function tagFormat(tag) {
+  const parsed = tag.replace(/ /g, '_');
+
+  const unparsed = tag.replace(/_/g, ' ');
+
+  return {
+    parsed,
+    unparsed,
+  };
+}
+
+/**
+ * Formateador de texto para cuando se vaya a guardar o mostrar al agregar
+ */
 function formatText(text) {
   text = text.replace(/[^a-zA-Z\s]/g, '');
   text = text.replace(/\s+/g, ' ');
@@ -46,21 +63,7 @@ function filterOptions(options = [], filter, exclude = []) {
   });
 }
 
-// return an array of exact option name matches from a comma-separated string
-function findMatches(options, search) {
-  const names = search.split(',');
-
-  return names
-    .map((name) => {
-      const match = options.filter(
-        (option) => name.trim().toLowerCase() === option.toLowerCase()
-      );
-      return match.length > 0 ? match[0] : null;
-    })
-    .filter((option) => option !== null);
-}
-
-// return combobox action from key press
+// Devolver accion en el combobox desde tecla presionada
 function getActionFromKey(event, menuOpen) {
   const { key, altKey, ctrlKey, metaKey } = event;
   // handle opening when closed
@@ -95,13 +98,13 @@ function getActionFromKey(event, menuOpen) {
   }
 }
 
-// get index of option that matches a string
+// Indice de una option que haga match con un string
 function getIndexByLetter(options, filter) {
   const firstMatch = filterOptions(options, filter)[0];
   return firstMatch ? options.indexOf(firstMatch) : -1;
 }
 
-// get updated option index
+// Obtener indice actualizado al usar teclas
 function getUpdatedIndex(current, max, action) {
   switch (action) {
     case MenuActions.First:
@@ -117,12 +120,12 @@ function getUpdatedIndex(current, max, action) {
   }
 }
 
-// check if an element is currently scrollable
+// Verificar si se puede scrollear
 function isScrollable(element) {
   return element && element.clientHeight < element.scrollHeight;
 }
 
-// ensure given child element is within the parent's visible scroll area
+// Asegurarse que el elemento hijo este visible en el elemento padre
 function maintainScrollVisibility(activeElement, scrollParent) {
   const { offsetHeight, offsetTop } = activeElement;
   const { offsetHeight: parentOffsetHeight, scrollTop } = scrollParent;
@@ -137,22 +140,30 @@ function maintainScrollVisibility(activeElement, scrollParent) {
   }
 }
 
-const options = [
-  { tag: 'Html' },
-  { tag: 'Css' },
-  { tag: 'Js' },
-  { tag: 'Php' },
-];
+/**
+ * Opciones para la listbox, los elementos deben tener el formato:
+ * { tag: 'name' }
+ */
+const options = [];
 
 function optionsMethods() {
   const data = options;
 
+  /**
+   * Funcion para refrescar las opciones luego de agregar un tag a la db
+   * el formato debe llegar como un array: [{ tag: 'name', ... }]
+   */
   function refresh() {
-    fetch('/tags').then((res) => {
-      options = res.json();
-    });
+    fetch('/tags')
+      .then((res) => res.json())
+      .then((data) => {
+        options = data;
+      });
   }
 
+  /**
+   * Funcion para agregar a la db
+   */
   function add(text) {
     return fetch('/tags', {
       method: 'POST',
@@ -170,6 +181,9 @@ function optionsMethods() {
   };
 }
 
+/**
+ * Tags seleccionados separados por comas: ['name', 'name2']
+ */
 const selections = [];
 
 function selectionsMethods() {
@@ -224,15 +238,24 @@ Multiselect.prototype.init = function () {
     const toAdd = formatText(this.inputEl.value);
     const { refresh, add } = optionsMethods();
 
-    // Method where add tag to database
+    /**
+     * Agregar a db
+     */
     add(toAdd);
 
-    // Dummy
+    /**
+     * Comentar esto
+     */
     options.push({ tag: toAdd });
 
-    // Method where refresh options from database
+    /**
+     * Refrescar opciones
+     */
     refresh();
 
+    /**
+     * Renderizar nuevas opciones
+     */
     this.reset();
 
     this.onOptionClick(toAdd);
@@ -257,20 +280,22 @@ Multiselect.prototype.mapOptions = function (options) {
 
   options.map((option) => {
     const optionEl = document.createElement('div');
+    const { parsed, unparsed } = tagFormat(option.tag);
+
     const conditional = selections.some(
       (selection) => selection === option.tag
     );
     optionEl.setAttribute('role', 'option');
-    optionEl.id = `${this.idBase}-${option.tag}`;
+    optionEl.id = `${this.idBase}-${parsed}`;
 
     optionEl.className = conditional
       ? 'combo-option option-selected'
       : 'combo-option';
     optionEl.setAttribute('aria-selected', conditional ? 'true' : 'false');
-    optionEl.innerText = option.tag;
+    optionEl.innerText = unparsed;
 
     optionEl.addEventListener('click', () => {
-      this.onOptionClick(option.tag);
+      this.onOptionClick(parsed);
     });
     optionEl.addEventListener('mousedown', this.onOptionMouseDown.bind(this));
 
@@ -280,11 +305,6 @@ Multiselect.prototype.mapOptions = function (options) {
 
 Multiselect.prototype.onInput = function () {
   const query = this.inputEl.value;
-
-  // const formated = formatText(curValue);
-  // this.inputEl.value = formated;
-
-  // const matches = filterOptions(this.options, curValue);
 
   function includes(str, query) {
     if (str === undefined) str = 'undefined';
@@ -306,16 +326,10 @@ Multiselect.prototype.onInput = function () {
     this.mapOptions.bind(this)(this.options);
   }
 
-  // if (this.inputEl.checkValidity()) {
-  //   document.getElementById('error').classList.add('hide');
-  // } else {
-  //   document.getElementById('error').classList.remove('hide');
-  // }
-
   if (!matches.length) {
-    this.addEl.classList.remove('hide');
+    this.addEl.className = '';
   } else {
-    this.addEl.classList.add('hide');
+    this.addEl.className = 'hide';
   }
 
   this.addEl.innerHTML = `<div id="combo-add-text" class="combo-new">${formatText(
@@ -331,7 +345,7 @@ Multiselect.prototype.onInput = function () {
   //   this.onOptionChange(this.options.indexOf(matches[0]));
   // }
 
-  const menuState = this.options.length > 0;
+  const menuState = this.options.length > 0 || query.length > 0;
   if (this.open !== menuState) {
     this.updateMenuState(menuState, false);
   }
@@ -387,12 +401,14 @@ Multiselect.prototype.onOptionChange = function (option) {
 
     return;
   }
+
+  const { parsed } = tagFormat(option);
   this.inputEl.setAttribute(
     'aria-activedescendant',
-    `${this.idBase}-${option}`
+    `${this.idBase}-${parsed}`
   );
 
-  const optionEl = this.el.querySelector(`#${this.idBase}-${option}`);
+  const optionEl = this.el.querySelector(`#${this.idBase}-${parsed}`);
   optionEl.classList.add('option-current');
 
   // if (this.open && isScrollable(this.listboxEl)) {
@@ -411,22 +427,23 @@ Multiselect.prototype.onOptionMouseDown = function () {
 };
 
 Multiselect.prototype.selectOption = function (option) {
+  const { parsed, unparsed } = tagFormat(option);
   const selections = selectionsMethods();
-  selections.add(option);
+  selections.add(unparsed);
 
   this.mapOptions(options);
 
-  // // add remove option button
+  // Agregar boton para deseleccionar opcion
   const listItem = document.createElement('li');
   listItem.className = 'remove-option';
 
   const textEl = document.createElement('span');
-  textEl.innerHTML = option;
+  textEl.innerHTML = unparsed;
 
   const buttonEl = document.createElement('button');
   buttonEl.className = 'clear-button remove-option-x';
   buttonEl.type = 'button';
-  buttonEl.id = `${this.idBase}-remove-${option}`;
+  buttonEl.id = `${this.idBase}-remove-${parsed}`;
   buttonEl.setAttribute('aria-describedby', `${this.idBase}-remove`);
   buttonEl.addEventListener('click', () => {
     this.removeOption(option);
@@ -441,19 +458,19 @@ Multiselect.prototype.selectOption = function (option) {
 };
 
 Multiselect.prototype.removeOption = function (option) {
+  const { parsed } = tagFormat(option);
   const selections = selectionsMethods();
   selections.remove(option);
 
   this.mapOptions(options);
 
-  // // remove button
-  const buttonEl = document.getElementById(`${this.idBase}-remove-${option}`);
+  // Boton para deseleccionar
+  const buttonEl = document.getElementById(`${this.idBase}-remove-${parsed}`);
   this.selectedEl.removeChild(buttonEl.parentElement);
 };
 
 Multiselect.prototype.updateOption = function (option) {
-  let optionEl = this.el.querySelector(`#${this.idBase}-${option}`);
-
+  let optionEl;
   if (typeof option === 'number') {
     const options = this.el.querySelectorAll('[role=option]');
 
@@ -463,17 +480,24 @@ Multiselect.prototype.updateOption = function (option) {
     }
 
     optionEl = options[option];
-
     option = optionEl.innerHTML;
+  } else {
+    const { parsed } = tagFormat(option);
+
+    optionEl = this.el.querySelector(`#${this.idBase}-${parsed}`);
   }
-  const isSelected = optionEl.getAttribute('aria-selected') === 'true';
+
+  let isSelected;
+
+  if (optionEl != null) {
+    isSelected = optionEl.getAttribute('aria-selected') === 'true';
+  }
 
   if (!isSelected) {
     this.selectOption(option);
   } else {
     this.removeOption(option);
   }
-
   this.reset();
 };
 
