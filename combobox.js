@@ -46,6 +46,7 @@ function tagFormat(tag) {
  * Formateador de texto para cuando se vaya a guardar o mostrar al agregar
  */
 function formatText(text) {
+  text = text.normalize('NFD');
   text = text.replace(/[^a-zA-Z\s]/g, '');
   text = text.replace(/\s+/g, ' ');
   text = text.toLowerCase();
