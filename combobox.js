@@ -227,6 +227,8 @@ const Multiselect = function (el, options) {
 };
 
 Multiselect.prototype.init = function () {
+  const { refresh, add } = optionsMethods();
+
   this.inputEl.addEventListener('input', this.onInput.bind(this));
   this.inputEl.addEventListener('blur', this.onInputBlur.bind(this));
   this.inputEl.addEventListener('click', () => this.updateMenuState(true));
@@ -236,7 +238,6 @@ Multiselect.prototype.init = function () {
 
   this.addEl.addEventListener('click', (e) => {
     const toAdd = formatText(this.inputEl.value);
-    const { refresh, add } = optionsMethods();
 
     /**
      * Agregar a db
@@ -263,6 +264,11 @@ Multiselect.prototype.init = function () {
   });
 
   this.addEl.addEventListener('mousedown', this.onOptionMouseDown.bind(this));
+
+  /**
+   * Traer opciones de la db
+   */
+  refresh();
 
   this.mapOptions.bind(this)(options);
 };
