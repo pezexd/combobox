@@ -26,12 +26,22 @@ Inicializar un campo (cambiar REF por cualquier identificador)
 </div>
 
 <script>
+/**
+ * Opciones para la listbox, los elementos deben tener el formato:
+ * { tag: 'name' }
+ */
 let options = [];
+
+/**
+ * Tags seleccionados separados por comas: ['name', 'name2']
+ * En la variable selections es donde se guardara las opciones que elije el usuario, de aca es que vas a sacar lo que selecciono el usuario para enviarlo al servidor
+ */
 let selections = [];
 
 const  multiselectEl = document.querySelector('.multiselectREF');
 
 const  multiselectComponent = new  Multiselect(multiselectEl, options, {
+	// Con refresh traemos las opciones desde la bd y se la pasamos a la variable options que es de donde el componente va a renderizar las opciones
 	async  refresh() {
 		fetch('/tags')
 		.then((res) =>  res.json())
@@ -39,6 +49,7 @@ const  multiselectComponent = new  Multiselect(multiselectEl, options, {
 			options = data;
 		});
 	},
+	// onAdd puedes dejarlo en blanco si no necesitas agregar una opcion a la bd cada vez que le den agregar
 	onAdd(text) {
 		fetch('/tags', {
 			method:  'POST',

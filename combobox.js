@@ -188,7 +188,7 @@ Multiselect.prototype.init = function () {
     /**
      * Refrescar opciones
      */
-    this.settings.refresh();
+    // this.settings.refresh();
 
     /**
      * Renderizar nuevas opciones
