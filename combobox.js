@@ -266,7 +266,7 @@ Multiselect.prototype.onInput = function () {
   const query = this.inputEl.value;
 
   if (this.settings.refreshOnInput) {
-    this.settings.refresh();
+    this.settings.refresh(query);
   }
 
   function includes(str, query) {
@@ -493,7 +493,15 @@ const multiselectEl = document.querySelector('.js-multiselect');
 const multiselectComponent = new Multiselect(multiselectEl, options, {
   removeOnSelect: false,
   refreshOnInput: true,
-  async refresh() {
+  async refresh(query) {
+    if (query) {
+      fetch(`/tags?query=${query}`)
+        .then((res) => res.json())
+        .then((data) => {
+          options = data;
+        });
+    }
+
     fetch('/tags')
       .then((res) => res.json())
       .then((data) => {

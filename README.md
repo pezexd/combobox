@@ -62,9 +62,10 @@ multiselectComponent.init();
 </script>
 ```
 
-Referencias
-
 ```
+
+Elemento donde esta el multiselect
+const element = document.querySelector('.multiselectREF');
 
 Opciones para la listbox, los elementos deben tener el formato: { tag: 'name' }
 let options = [];
