@@ -265,16 +265,17 @@ Multiselect.prototype.mapOptions = function (options) {
 Multiselect.prototype.onInput = function () {
   const query = this.inputEl.value;
 
-  if (this.settings.refreshOnInput) {
-    this.settings.refresh(query);
-  }
-
   function includes(str, query) {
     if (str === undefined) str = 'undefined';
     if (str === null) str = 'null';
     if (str === false) str = 'false';
     const text = str.toString().toLowerCase();
     return text.indexOf(query.trim()) !== -1;
+  }
+
+  if (this.settings.refreshOnInput) {
+    this.settings.refresh(query);
+    this.mapOptions(this.options);
   }
 
   const matches = query
