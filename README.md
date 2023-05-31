@@ -89,4 +89,5 @@ Multiselect (element, options, settings)
 ```
 
 [AVISO]
-En caso de que se use refreshOnInput, lo ideal es que en la funcion onAdd si o si se coloque para agregar a la bd directamente, ya que si se refrescan las opciones al escribir en el campo de texto, el tag que agrego el usuario anteriormente desaparecera y se podria generar un error
+En caso de que se use refreshOnInput, lo ideal es que en la funcion onAdd si o si se coloque para agregar a la bd directamente, ya que si se refrescan las opciones al escribir en el campo de texto, el tag que agrego el usuario anteriormente desaparecera y se podria generar un error.
+Tambien al traer las opciones, seria bueno que desde el server solo limite estas a 20, ya que podria haber una sobrecarga en la web.
