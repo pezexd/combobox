@@ -157,7 +157,11 @@ const Multiselect = function (el, options, settings) {
   // data
   this.options = options;
 
-  this.settings = settings;
+  this.settings = {
+    removeOnSelect: true,
+    refreshOnInput: false,
+    ...settings,
+  };
 
   // state
   this.activeIndex = 0;
@@ -247,6 +251,10 @@ Multiselect.prototype.mapOptions = function (options) {
 
 Multiselect.prototype.onInput = function () {
   const query = this.inputEl.value;
+
+  if (this.settings.refreshOnInput) {
+    this.settings.refresh();
+  }
 
   function includes(str, query) {
     if (str === undefined) str = 'undefined';
@@ -436,7 +444,9 @@ Multiselect.prototype.updateOption = function (option) {
   if (!isSelected) {
     this.selectOption(option);
   } else {
-    this.removeOption(option);
+    if (this.settings.removeOnSelect) {
+      this.removeOption(option);
+    }
   }
   this.reset();
 };
@@ -468,6 +478,8 @@ let selections = [];
 // init multiselect
 const multiselectEl = document.querySelector('.js-multiselect');
 const multiselectComponent = new Multiselect(multiselectEl, options, {
+  removeOnSelect: false,
+  refreshOnInput: true,
   async refresh() {
     fetch('/tags')
       .then((res) => res.json())
