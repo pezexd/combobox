@@ -26,17 +26,6 @@ Inicializar un campo (cambiar REF por cualquier identificador)
 </div>
 
 <script>
-/**
- * Opciones para la listbox, los elementos deben tener el formato:
- * { tag: 'name' }
- */
-let options = [];
-
-/**
- * Tags seleccionados separados por comas: ['name', 'name2']
- * En la variable selections es donde se guardara las opciones que elije el usuario, de aca es que vas a sacar lo que selecciono el usuario para enviarlo al servidor
- */
-let selections = [];
 
 const  multiselectEl = document.querySelector('.multiselectREF');
 
@@ -72,3 +61,37 @@ const  multiselectComponent = new  Multiselect(multiselectEl, options, {
 multiselectComponent.init();
 </script>
 ```
+
+Referencias
+
+---
+
+Opciones para la listbox, los elementos deben tener el formato: { tag: 'name' }
+let options = [];
+
+---
+
+---
+
+Tags seleccionados separados por comas: ['name', 'name2']
+En la variable selections es donde se guardara las opciones que elije el usuario, de aca es que vas a sacar lo que selecciono el usuario para enviarlo al servidor
+
+let selections = [];
+
+---
+
+---
+
+let settings = {
+selections: array --> USO: Arreglo donde se guardaran las selecciones
+removeOnSelect: booleano --> true POR DEFECTO, USO: Remover seleccion al seleccionar de nuevo en listbox
+refreshOnInput: booleano --> false POR DEFECTO, USO: Refrescar al escribir o eliminar caracteres
+refresh: funcion(query) --> USO: Traemos las opciones desde la bd y le pasamos los datos a la variable options
+onAdd: funcion(opcion) --> USO: Agregar opcion a la bd
+onSelect: funcion(opcion) --> USO: Agregar opcion a la variable selections
+onRemove: function(opcion) --> USO: Remover opcion en la variable selections
+}
+
+---
+
+Multiselect (element, options, settings)

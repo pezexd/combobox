@@ -160,6 +160,19 @@ const Multiselect = function (el, options, settings) {
   this.settings = {
     removeOnSelect: true,
     refreshOnInput: false,
+    refresh() {
+      return;
+    },
+    onAdd(text) {
+      return;
+    },
+    onSelect(option) {
+      return;
+    },
+    onRemove() {
+      return;
+    },
+    selections: [],
     ...settings,
   };
 
